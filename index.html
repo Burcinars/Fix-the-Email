@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Hanken+Grotesk:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Fix the Email · Opening, body, closing, signature</title>
+<style>
+:root{
+  --ink:#1F1B24;--ink2:#4A4550;--muted:#6B6570;
+  --page:#FBF8F3;--card:#FFFFFF;--line:#E6DED3;--line2:#D6CCBF;
+  --blue:#D4E8FA;--blueInk:#2F5E8F;--blueEdge:#7FAEDD;
+  --mint:#D6F3E4;--mintInk:#2F6B4F;--mintEdge:#6FB592;
+  --peach:#FFE1CF;--peachInk:#8A4B1C;--peachEdge:#E3A47A;
+  --lav:#E6DDF8;--lavInk:#5C4A9E;--lavEdge:#A08BD6;
+  --butter:#FFF2B8;--butterInk:#5C4600;--butterEdge:#D9B92A;
+  --pink:#FFDCE8;--pinkInk:#8A2F55;--pinkEdge:#E79BB7;
+  --peri:#DDE3FF;--periInk:#2F3F8A;--periEdge:#9FAEE8;
+  --cream:#F3EEE3;--creamInk:#5A4A2F;--creamEdge:#CDBFA5;
+  --note:#EEF1F5;--noteEdge:#A9B6C6;
+  --r:18px;
+  --shadow:0 1px 2px rgba(31,27,36,.06),0 8px 24px rgba(31,27,36,.07);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--page);color:var(--ink);font-family:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;font-size:20px;line-height:1.6;letter-spacing:.005em;-webkit-font-smoothing:antialiased}
+h1,h2{font-family:'Fraunces',Georgia,serif;font-weight:600;line-height:1.15;margin:0 0 .4em;letter-spacing:-.005em}
+h1{font-size:38px}h2{font-size:30px}
+p{margin:0 0 .7em}
+b{font-weight:700}
+button{font-family:inherit;color:inherit}
+textarea,input{font-family:inherit}
+
+/* top */
+.top{position:sticky;top:0;z-index:40;background:var(--page);border-bottom:1px solid var(--line)}
+.top-in{max-width:860px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces';font-weight:600;font-size:21px;line-height:1.15}
+.brand small{display:block;font-family:'Hanken Grotesk';font-weight:600;font-size:14px;color:var(--ink2)}
+.progress{flex:1;min-width:140px;display:flex;align-items:center;gap:10px}
+.bar{flex:1;height:10px;border-radius:999px;background:#E9E3DA;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--mintInk);border-radius:999px;transition:width .4s ease}
+.pcount{font-size:14px;font-weight:700;color:var(--ink2);white-space:nowrap}
+.points{background:#FFF2B8;border:1.5px solid #E6CF6A;color:#5C4600;border-radius:999px;padding:3px 12px;font-weight:700;font-size:15px;white-space:nowrap}
+.points.bump{animation:bump .5s ease}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+.modetag{font-size:13.5px;font-weight:600;color:var(--ink2);background:#EFEAE3;border-radius:999px;padding:3px 10px;white-space:nowrap}
+
+/* page */
+.wrap{max-width:860px;margin:0 auto;padding:22px 20px 160px}
+#page{animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.lrow{font-size:21px}
+.small{font-size:16px;color:var(--ink2)}
+.band{border-radius:var(--r);padding:18px 22px 12px;margin:0 0 16px}
+.band .kicker{font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;opacity:.85;margin-bottom:4px}
+.band h1{margin-bottom:.2em}
+.how{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px 20px;box-shadow:var(--shadow);margin-bottom:16px}
+.how ol,.how ul{margin:8px 0 0;padding-left:24px}
+.how li{margin-bottom:6px}
+.sticky{background:#FFF2B8;border:1.5px solid #E6CF6A;border-radius:6px;padding:14px 18px;font-size:21px;line-height:1.5;margin:0 0 16px;box-shadow:3px 4px 0 rgba(0,0,0,.08);position:relative;transform:rotate(-.6deg)}
+.sticky .sig{display:block;font-weight:700;margin-top:6px;text-align:right}
+.who{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:14.5px;color:var(--ink2);margin-bottom:10px}
+.plain{background:var(--note);border-left:8px solid var(--noteEdge);border-radius:14px;padding:12px 16px;margin:0 0 16px;font-size:19.5px}
+.plain b{font-weight:800}
+
+/* job box */
+.job{background:var(--blue);border:2px solid var(--blueEdge);border-left:8px solid var(--blueInk);border-radius:16px;padding:12px 16px 12px;margin:0 0 16px}
+.jobtitle{font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--blueInk);margin-bottom:4px}
+.jobtext{font-size:20px;font-weight:700;line-height:1.4}
+.jobnote{font-size:16.5px;color:var(--ink2);margin:6px 0 0}
+
+/* email card */
+.email{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 20px 16px;margin:0 0 16px;font-size:19px;line-height:1.5}
+.email .hdr{font-size:16.5px;display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;align-items:start;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.email .lab{font-weight:800;color:var(--muted)}
+.email p{margin:0 0 4px}
+.blk{position:relative;transition:opacity .5s,background .5s;padding:6px 12px 6px 14px;margin:8px 0;border-left:6px solid transparent;border-radius:10px}
+.blk.inl{margin:0;padding:2px 10px;display:block}
+.blk.on{border-left-color:var(--c)}
+.blk.lit{background:var(--cl)}
+.blk.flash{animation:flash 1.2s ease}
+@keyframes flash{0%{background:var(--cl)}100%{background:transparent}}
+.blk[data-c="peach"]{--c:var(--peachEdge);--ci:var(--peachInk);--cl:var(--peach)}
+.blk[data-c="blue"]{--c:var(--blueEdge);--ci:var(--blueInk);--cl:var(--blue)}
+.blk[data-c="lav"]{--c:var(--lavEdge);--ci:var(--lavInk);--cl:var(--lav)}
+.blk[data-c="butter"]{--c:var(--butterEdge);--ci:var(--butterInk);--cl:var(--butter)}
+.blk[data-c="pink"]{--c:var(--pinkEdge);--ci:var(--pinkInk);--cl:var(--pink)}
+.blk[data-c="peri"]{--c:var(--periEdge);--ci:var(--periInk);--cl:var(--peri)}
+.blk[data-c="cream"]{--c:var(--creamEdge);--ci:var(--creamInk);--cl:var(--cream)}
+.pill{position:absolute;right:10px;top:-13px;font-size:14px;font-weight:800;background:var(--cl);border:1.5px solid var(--c);color:var(--ci);padding:1px 10px;border-radius:999px;white-space:nowrap;animation:rise .5s ease both}
+.sent{transition:opacity .5s,background .5s;border-radius:6px}
+.sent.tap{cursor:pointer;border-bottom:2px dashed var(--line2)}
+.sent.tap:hover{background:#F1ECE4}
+.sent.hit{background:var(--blue);box-shadow:0 0 0 4px var(--blue);border-bottom-color:transparent}
+.sent.nope{background:var(--peach);box-shadow:0 0 0 4px var(--peach)}
+.email[data-spot="opening"] .blk:not([data-blk="opening"]),
+.email[data-spot="subject"] .blk:not([data-blk="subject"]),
+.email[data-spot="sections"] .blk:not([data-blk^="sec"]),
+.email[data-spot="sec0"] .blk:not([data-blk="sec0"]),
+.email[data-spot="sec1"] .blk:not([data-blk="sec1"]),
+.email[data-spot="closing"] .blk:not([data-blk="closing"]),
+.email[data-spot="signature"] .blk:not([data-blk="signature"]){opacity:.32}
+.email[data-spot="find"] .sent:not(.hit):not(.nope):not(.tap){opacity:.4}
+.open-line{font-weight:700}
+.h{font-weight:800;margin:0 0 2px}
+.email ol,.email ul{margin:2px 0 4px 26px;padding:0}
+.email li{margin:3px 0}
+.email li::marker{font-weight:800}
+.sig .name{font-weight:800}
+.enter{animation:rise .55s ease both}
+.lift{transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.compare{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.compare .col{flex:1 1 320px;min-width:0}
+.cap{font-weight:800;color:var(--ink2);font-size:15px;letter-spacing:.05em;text-transform:uppercase;margin:0 0 6px 4px}
+.compare .email{font-size:16.5px}
+
+/* options */
+.opts{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;background:#fff;border:2px solid var(--line2);border-radius:14px;padding:12px 16px;font-size:19px;line-height:1.4;cursor:pointer;box-shadow:var(--shadow);transition:border-color .2s,background .2s}
+.opt:hover{border-color:var(--ink)}
+.opt:focus-visible{outline:3px solid var(--blueInk);outline-offset:2px}
+.opt .L{flex:none;width:32px;height:32px;border-radius:50%;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px}
+.opt.good{background:var(--mint);border-color:var(--mintEdge)}
+.opt.good .L{background:var(--mintInk);border-color:var(--mintInk);color:#fff}
+.opt.miss{background:var(--peach);border-color:var(--peachEdge);color:var(--peachInk)}
+.opt.miss .L{border-color:var(--peachEdge);color:var(--peachInk)}
+.opt[disabled]{cursor:default;opacity:.75}
+.opt.good[disabled]{opacity:1}
+.fb{border-radius:14px;padding:12px 16px;margin:0 0 14px;font-size:19px;line-height:1.5;animation:fade .3s ease}
+.fb.good{background:var(--mint);border-left:8px solid var(--mintEdge)}
+.fb.miss{background:var(--peach);border-left:8px solid var(--peachEdge)}
+.fb.note{background:var(--note);border-left:8px solid var(--noteEdge)}
+.btn{border:2px solid var(--ink);background:#fff;border-radius:999px;padding:10px 22px;font-weight:700;font-size:19px;cursor:pointer;box-shadow:0 3px 0 var(--ink);line-height:1.2}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.btn.blue{background:var(--blueInk);border-color:var(--blueInk);color:#fff;box-shadow:0 3px 0 #1F4268}
+.btn.soft{background:#F1EEEA;border-color:#C9BFB1;box-shadow:0 3px 0 #C9BFB1}
+.btn.ghost{background:transparent;border-color:transparent;box-shadow:none;color:var(--ink2);padding-left:6px}
+.btn.wide{display:block;width:100%;margin:8px 0}
+.btn[disabled]{opacity:.45;cursor:default;transform:none}
+.linkbtn{background:none;border:0;padding:0;text-decoration:underline;cursor:pointer;font-size:inherit;color:var(--blueInk)}
+.btnrow{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:4px 0 14px}
+
+/* write */
+.field{width:100%;font-size:19px;line-height:1.5;padding:10px 14px;border:2px solid var(--line2);border-radius:12px;background:#fff;color:var(--ink)}
+.field:focus{outline:3px solid var(--blueEdge);border-color:var(--blueInk)}
+textarea.field{min-height:150px;resize:vertical}
+.wlab{display:block;font-weight:800;margin:14px 0 6px;font-size:18px}
+.wlab span{font-weight:600;color:var(--ink2);font-size:16px}
+.hint{font-size:16px;color:var(--ink2);margin:4px 0 0}
+.checks{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;box-shadow:var(--shadow);margin:16px 0}
+.checks .ct{font-weight:800;font-size:15px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px}
+.ck{display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:18px;line-height:1.4;border-top:1px solid var(--line)}
+.ck .box{flex:none;width:26px;height:26px;border-radius:7px;border:2px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;margin-top:2px}
+.ck.ok .box{background:var(--mintInk);border-color:var(--mintInk);color:#fff}
+.ck.ok{color:var(--ink2)}
+.facts{background:var(--butter);border-left:8px solid var(--butterEdge);border-radius:14px;padding:12px 16px;margin:0 0 14px}
+.facts ul{margin:6px 0 0;padding-left:22px}
+.facts li{margin:3px 0}
+.bigscore{font-family:'Fraunces',Georgia,serif;font-size:34px;font-weight:600;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px 20px;box-shadow:var(--shadow);margin:0 0 16px}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;background:var(--page);border-top:1px solid var(--line);z-index:45}
+.nav-in{max-width:860px;margin:0 auto;padding:10px 20px;display:flex;gap:12px;align-items:center}
+.navmsg{margin-left:auto;color:var(--ink2);font-size:16px;font-weight:700;text-align:right;line-height:1.3}
+@media (max-width:480px){.navmsg{display:none}.nav-in{justify-content:space-between}h1{font-size:30px}}
+
+/* sign in */
+.modebox{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px}
+.modebox.signed{background:var(--mint);border-color:var(--mintEdge)}
+.modehead{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:26px;margin-bottom:10px}
+.modenote{margin:4px 0 14px}
+.signstep{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.stephead{display:flex;align-items:center;gap:10px;font-weight:700;margin-bottom:8px;line-height:1.35}
+.sn{flex:none;width:30px;height:30px;border-radius:50%;background:var(--blueInk);color:#fff;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center}
+.secrow{display:flex;gap:10px;flex-wrap:wrap}
+.secbtn{flex:1 1 200px;text-align:left;background:#fff;border:2px solid var(--line2);border-radius:14px;padding:10px 14px;cursor:pointer;line-height:1.3}
+.secbtn span{display:block;font-size:15px;color:var(--ink2);font-weight:600}
+.secbtn.on{border-color:var(--blueInk);background:var(--blue)}
+.secbtn[disabled]{cursor:default}
+.err{color:#8A2F2F;font-weight:700;min-height:1.4em;margin-bottom:8px}
+.confirm{background:var(--blue);border:2px solid var(--blueEdge);border-radius:var(--r);padding:16px 18px;margin-bottom:14px}
+.bigid{font-size:34px;font-weight:800;letter-spacing:.08em}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="brand">✉️ <span>Fix the Email<small>Opening · body · closing · signature</small></span></div>
+  <div class="progress"><div class="bar"><i id="barfill"></i></div><span class="pcount" id="pcount"></span></div>
+  <span class="modetag" id="modetag" style="display:none"></span>
+  <span class="points" id="points">0 points</span>
+</div></header>
+<main class="wrap"><div id="page"></div></main>
+<nav class="nav" aria-label="Pages">
+  <div class="nav-in">
+    <button class="btn soft" type="button" id="back">‹ Back</button>
+    <button class="btn blue" type="button" id="next">Next ›</button>
+    <span class="navmsg" id="navmsg"></span>
+  </div>
+</nav>
+
+<script>
+/* ================= HELPERS ================= */
+var $ = function(s, r){ return (r || document).querySelector(s); };
+var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function words(s){ var m = String(s).trim().match(/\S+/g); return m ? m.length : 0; }
+function shuffle(a){ a = a.slice(); for (var i = a.length - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function onClick(sel, fn){ var el = $(sel); if (el) el.addEventListener('click', fn); }
+
+/* ================= CLASS VERSION (recording) ================= */
+var CONFIG = {
+  ENDPOINT: 'https://script.google.com/macros/s/AKfycbz8sy_FMZsIJuAOQOtbmRqBn-P03bvZCW-Dev7BEBSWBblCSi0RF1CMTMS39JCzWvTgOQ/exec',
+  SALT1: 'northline-ctstate-2026',
+  ACTIVITY: 'FIX1',
+  VERSION: 'fix1-2026-10-19a',
+  SECTIONS: {'13046': {label:'CRN 13046', sub:'In person · Mon/Wed 12:30'}, '13901': {label:'CRN 13901', sub:'Live online · Mon/Wed 5:30'}}
+};
+var QS = (function(){ try { return new URLSearchParams(location.search); } catch(e){ return {get:function(){ return null; }}; } })();
+if (QS.get('test') === '1') CONFIG.ACTIVITY += '-TEST';
+var PRESET = CONFIG.SECTIONS[QS.get('s')] ? QS.get('s') : null;
+var STORE_KEY = 'fixtheemail_' + CONFIG.ACTIVITY;
+function newCls(){ return {mode:null, section:PRESET, h1:null, tail:'', code:'', recordId:null, startedAt:null, unverified:false, submitted:null, submitError:null, submitting:false}; }
+function isClass(){ return !!(st && st.cls && st.cls.mode === 'class'); }
+function save(){
+  try { var o = {}; Object.keys(st).forEach(function(k){ if (k !== 'form' && k !== 'look') o[k] = st[k]; });
+    sessionStorage.setItem(STORE_KEY, JSON.stringify({v:CONFIG.VERSION, st:o})); } catch(e){}
+}
+function restore(){
+  try {
+    var raw = sessionStorage.getItem(STORE_KEY); if (!raw) return false;
+    var o = JSON.parse(raw);
+    if (!o || o.v !== CONFIG.VERSION || !o.st || !o.st.pg || o.st.pg.length !== PAGES.length) return false;
+    st = o.st; if (!st.cls) st.cls = newCls(); st.cls.submitting = false;
+    if (st.view !== 'pages') st.view = 'pages';
+    return true;
+  } catch(e){ return false; }
+}
+function normalizeId(raw){ return String(raw || '').replace(/\D/g, ''); }
+function normalizeCode(c){ return String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+function secLabel(s){ return CONFIG.SECTIONS[s] ? CONFIG.SECTIONS[s].label : String(s || ''); }
+function shortId(h){ return h ? String(h).slice(0, 6).toUpperCase() : ''; }
+function showNav(on){ var n = $('.nav'); if (n) n.style.display = on ? '' : 'none'; }
+function modeTag(){ var t = $('#modetag'); if (!t) return; if (!st.cls.mode){ t.style.display = 'none'; return; } t.style.display = ''; t.textContent = isClass() ? 'Class version' : 'Practice'; }
+async function sha256Hex(text){
+  var buf = new TextEncoder().encode(text);
+  var hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(function(b){ return b.toString(16).padStart(2, '0'); }).join('');
+}
+async function postOnce(payload, timeoutMs){
+  var ctrl = new AbortController();
+  var t = setTimeout(function(){ ctrl.abort(); }, timeoutMs || 60000);
+  try {
+    var res = await fetch(CONFIG.ENDPOINT, {method:'POST', body:JSON.stringify(payload), signal:ctrl.signal, credentials:'omit', cache:'no-store'});
+    var text = await res.text();
+    try { return JSON.parse(text); } catch(e){ return {ok:false, error:'bad_response'}; }
+  } catch(e){ return {ok:false, error:(e && e.name === 'AbortError') ? 'timeout' : 'network'}; }
+  finally { clearTimeout(t); }
+}
+async function post(payload, timeoutMs){
+  var r = null;
+  for (var a = 0; a < 3; a++){
+    r = await postOnce(payload, timeoutMs || 60000);
+    if (r && (r.ok || (r.error !== 'timeout' && r.error !== 'network' && r.error !== 'bad_response'))) return r;
+    await new Promise(function(res){ setTimeout(res, 1200 + a * 800); });
+  }
+  return r;
+}
+function whoStrip(p){
+  if (!isClass() || p.type === 'start') return '';
+  var c = st.cls;
+  return '<div class="who"><span>🎓 Class version · ' + esc(secLabel(c.section)) + ' · ID ending in <b>' + esc(c.tail) + '</b></span>' + (c.recordId ? '<span>Record ' + esc(shortId(c.recordId)) + '</span>' : '') + '</div>';
+}
+function modeBox(){
+  var c = st.cls;
+  if (c.mode === 'class') return '<div class="modebox signed"><b>✅ You are signed in.</b> ' + esc(secLabel(c.section)) + ' · ID ending in <b>' + esc(c.tail) + '</b>. Press <b>Next ›</b> at the bottom.</div>';
+  if (c.mode === 'practice') return '<div class="modebox"><b>You are in practice mode.</b> Nothing is saved. Press <b>Next ›</b> at the bottom.' +
+    '<p class="small" style="margin:10px 0 0">Need points? <button class="linkbtn" type="button" id="toClass">Switch to the class version</button> (this starts over from page 1).</p></div>';
+  return '<div class="modebox">' +
+    '<div class="modehead">Choose one</div>' +
+    '<button class="btn blue wide" type="button" id="goClass">🎓 Class version (for points) ›</button>' +
+    '<p class="small modenote">Use this in class. You need the <b>class code</b> your professor gives you. Your points and the email you write are saved for your professor.</p>' +
+    '<button class="btn soft wide" type="button" id="goPractice">Practice only</button>' +
+    '<p class="small modenote">Nothing is saved. No points count.</p>' +
+    '<p class="small" style="margin:4px 0 0"><button class="linkbtn" type="button" id="goLookup">Already finished? Check that your result was saved.</button></p>' +
+  '</div>';
+}
+function secButtons(locked){
+  return '<div class="secrow">' + Object.keys(CONFIG.SECTIONS).map(function(k){ var s = CONFIG.SECTIONS[k], on = st.cls.section === k;
+    return '<button type="button" class="secbtn' + (on ? ' on' : '') + '" data-sec="' + k + '" aria-pressed="' + on + '"' + (locked ? ' disabled' : '') + '><b>' + esc(s.label) + '</b><span>' + esc(s.sub) + '</span></button>'; }).join('') + '</div>';
+}
+function renderSignin(){
+  showNav(false); modeTag();
+  var f = st.form || (st.form = {id:'', code:'', confirm:false, err:''});
+  var h = '<h1>Class version: sign in</h1>' +
+    '<p class="lrow">Three short steps. Then the activity starts.</p>' +
+    '<div class="signstep"><div class="stephead"><span class="sn">1</span> Tap your class.</div>' + secButtons(f.confirm) + '</div>' +
+    '<div class="signstep"><label class="stephead" for="sid"><span class="sn">2</span> Type the 8 digit number you log in to Blackboard with.</label>' +
+      '<p class="small" style="margin:0 0 8px">This is your Student ID. It starts with 0, for example 03083452.</p>' +
+      '<input id="sid" class="field" inputmode="numeric" autocomplete="off" maxlength="14" value="' + esc(f.id) + '"' + (f.confirm ? ' readonly' : '') + '></div>' +
+    '<div class="signstep"><label class="stephead" for="scode"><span class="sn">3</span> Type the class code.</label>' +
+      '<p class="small" style="margin:0 0 8px">Your professor gives it in class. It is a word and a number.</p>' +
+      '<input id="scode" class="field" autocomplete="off" autocapitalize="characters" spellcheck="false" value="' + esc(f.code) + '"' + (f.confirm ? ' readonly' : '') + '></div>' +
+    '<div id="serr" class="err" aria-live="polite">' + esc(f.err || '') + '</div>';
+  if (!f.confirm){
+    h += '<div class="btnrow"><button type="button" class="btn blue" id="signNext">Next ›</button></div>';
+  } else {
+    var d = normalizeId(f.id);
+    h += '<div class="confirm"><p style="margin:0 0 4px">You typed:</p><div class="bigid">' + esc(d.slice(0, 4) + ' ' + d.slice(4)) + '</div>' +
+      '<p style="margin:8px 0 12px">Is this <b>your</b> Blackboard number? If it is wrong, your points go to no one.</p>' +
+      '<div class="btnrow"><button type="button" class="btn blue" id="signYes">Yes, that is me ›</button><button type="button" class="btn soft" id="signFix">No, let me fix it</button></div></div>';
+  }
+  h += '<div class="how" style="margin-top:18px"><b>🔒 What is saved</b><br>A scrambled version of your number, your points, the email you write, and the time. Your name is never saved. Your number is never saved the way you typed it.</div>' +
+    '<p><button type="button" class="btn ghost" id="signBack">‹ Back to the start</button></p>';
+  $('#page').innerHTML = h;
+  var sid = $('#sid'), sc = $('#scode');
+  if (sid) sid.addEventListener('input', function(){ f.id = sid.value; });
+  if (sc) sc.addEventListener('input', function(){ f.code = sc.value; });
+  if (!f.confirm) $$('[data-sec]').forEach(function(b){ b.addEventListener('click', function(){ keepInputs(); st.cls.section = b.dataset.sec; f.err = ''; renderSignin(); }); });
+  onClick('#signNext', function(){
+    keepInputs(); var d = normalizeId(f.id);
+    if (!st.cls.section){ f.err = 'Step 1 is missing: tap your class.'; renderSignin(); return; }
+    if (d.length !== 8){ f.err = 'Step 2: your number needs 8 digits. You typed ' + d.length + '.'; renderSignin(); return; }
+    if (normalizeCode(f.code).length < 3){ f.err = 'Step 3 is missing: type the class code.'; renderSignin(); return; }
+    f.err = ''; f.confirm = true; renderSignin();
+  });
+  onClick('#signFix', function(){ f.confirm = false; f.err = ''; renderSignin(); var i = $('#sid'); if (i) i.focus(); });
+  onClick('#signYes', signIn);
+  onClick('#signBack', function(){ st.form = null; st.view = 'pages'; go(0); });
+}
+function keepInputs(){ var sid = $('#sid'), sc = $('#scode'); if (!st.form) return; if (sid) st.form.id = sid.value; if (sc) st.form.code = sc.value; }
+async function signIn(){
+  var f = st.form, btn = $('#signYes');
+  var d = normalizeId(f.id), code = normalizeCode(f.code);
+  btn.disabled = true; btn.textContent = 'Checking the class code…';
+  var wait = document.createElement('p'); wait.className = 'small'; wait.style.margin = '10px 0 0'; wait.textContent = '⏳ This can take up to one minute. Keep this page open.'; btn.parentNode.parentNode.appendChild(wait);
+  var fx = $('#signFix'); if (fx) fx.disabled = true;
+  var h1;
+  try { h1 = await sha256Hex(CONFIG.SALT1 + '|' + d); }
+  catch(e){ f.err = 'This browser could not scramble your number. Open this page in Chrome, Safari, or Edge.'; f.confirm = false; renderSignin(); return; }
+  var r = await postOnce({action:'start', h1:h1, section:st.cls.section, activity:CONFIG.ACTIVITY, code:code, clientVersion:CONFIG.VERSION}, 45000);
+  var unreachable = !r || r.error === 'timeout' || r.error === 'network' || r.error === 'bad_response';
+  if (!unreachable && !r.ok){
+    var why = {bad_code:'That class code is not right. Check it and type it again.',
+      window_closed:'This activity is closed right now. It opens in class. The closing time is in Blackboard. Ask Professor Calafiore.',
+      no_endpoint:'Saving is switched off on this copy of the page.'};
+    f.err = why[r.error] || ('Something went wrong (' + r.error + '). Try again.');
+    f.confirm = false; renderSignin(); return;
+  }
+  var c = st.cls;
+  c.mode = 'class'; c.h1 = h1; c.tail = d.slice(-2); c.code = code; c.unverified = unreachable;
+  c.recordId = (r && r.ok && r.recordId) || null; c.startedAt = new Date().toISOString();
+  st.form = null; st.view = 'pages';
+  go(1);
+}
+async function submitFinal(){
+  var c = st.cls;
+  if (!isClass() || c.submitting || (c.submitted && c.submitted.ok)) return;
+  c.submitting = true; c.submitError = null; save(); refreshEndStatus();
+  var pts = [], tries = [];
+  PAGES.forEach(function(p, i){ if (p.type === 'check' || p.type === 'decide'){ var s = st.pg[i]; pts.push(s.firstTry == null ? 0 : s.firstTry); tries.push(s.tries || 0); } });
+  var w = writeState();
+  var payload = {action:'submit', h1:c.h1, section:c.section, activity:CONFIG.ACTIVITY, code:c.code, clientVersion:CONFIG.VERSION,
+    startedAt:c.startedAt, score:total(), maxScore:MAXPTS,
+    practicePicks:pts, practiceExplored:tries,
+    checkAnswers:[clip(w.subject, 200), clip(w.opening, 400), clip(w.body, 1500), clip(w.closing, 300), clip(w.signature, 200)],
+    checkStatuses:[w.locked ? 'rewrite locked in' : 'rewrite not locked', 'words ' + words(w.body)]};
+  var r = await post(payload, 60000);
+  c.submitting = false;
+  if (r && r.ok){ c.submitted = r; c.recordId = r.recordId || c.recordId; c.submitError = null; }
+  else c.submitError = (r && r.error) || 'network';
+  save(); refreshEndStatus();
+}
+function clip(s, n){ return String(s || '').replace(/\s+/g, ' ').trim().slice(0, n); }
+function recHTML(){
+  var c = st.cls, lab = esc(secLabel(c.section));
+  if (c.submitted && c.submitted.ok){
+    var when = c.submitted.submittedAt ? new Date(c.submitted.submittedAt) : new Date();
+    if (isNaN(when)) when = new Date();
+    var t = when.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    var again = (c.submitted.already && c.submitted.score != null && +c.submitted.score !== total()) ? ' A result for this number was already saved earlier, so the first one stands (' + esc(c.submitted.score) + ' of ' + esc(c.submitted.maxScore) + ' points).' : '';
+    return '<div class="fb good"><b>✅ Saved</b> at ' + esc(t) + ' for ' + lab + '. Record ID <b>' + esc(shortId(c.recordId)) + '</b>.' + again + '</div>' +
+      '<p class="small">📸 Take a screenshot of this page. It is your proof. Your grade appears in Blackboard after the activity closes.</p>';
+  }
+  if (c.submitting || !c.submitError) return '<div class="fb note"><b>⏳ Saving your result…</b> This can take up to one minute. Keep this page open.</div>';
+  var msgs = {window_closed:'The activity is closed now, so this result was not saved.', bad_code:'The class code did not match, so this result was not saved yet. Your answers are still here.',
+    timeout:'The connection timed out.', network:'The connection failed.', bad_response:'The answer from the server was not readable.'};
+  var m = msgs[c.submitError] || ('Error: ' + c.submitError + '.');
+  var retry = c.submitError === 'window_closed' ? '' : (c.submitError === 'bad_code' ?
+    '<div class="signstep" style="margin-top:12px"><label class="stephead" for="fixcode"><span class="sn">!</span> Type the class code again.</label><input id="fixcode" class="field" autocomplete="off" autocapitalize="characters" spellcheck="false"><div class="btnrow" style="margin-top:12px"><button class="btn blue" type="button" id="retryCode">Save with this code</button></div></div>' :
+    '<p><button class="btn blue" type="button" id="retrySubmit">Try to save again</button></p><p class="small">Check the Wi-Fi first.</p>');
+  return '<div class="fb miss"><b>⚠️ Not saved yet.</b> ' + esc(m) + '</div>' + retry +
+    '<p class="small">📸 Take a screenshot of this whole page now and show it to Professor Calafiore. Backup code: <b>B-' + esc(shortId(c.h1)) + '</b>.</p>';
+}
+function refreshEndStatus(){ var b = $('#recbox'); if (!b) return; b.innerHTML = recHTML(); onClick('#retrySubmit', submitFinal); onClick('#retryCode', function(){ var v = normalizeCode(($('#fixcode') || {}).value); if (v.length < 3) return; st.cls.code = v; st.cls.submitError = null; submitFinal(); }); }
+function endStatus(){
+  if (!isClass()) return '<div class="how"><b>This was practice.</b> Nothing was saved, and no points count. For points, do the <b>class version</b> with the class code.</div>' +
+    '<button class="btn soft" id="restart" type="button">↺ Start over</button>';
+  return '<div id="recbox">' + recHTML() + '</div>';
+}
+function renderLookup(){
+  showNav(false); modeTag();
+  var f = st.look || (st.look = {id:'', out:''});
+  var h = '<h1>Check your result</h1>' +
+    '<p class="lrow">See if your class version was saved. Your score is not shown here. It appears in Blackboard.</p>' +
+    '<div class="signstep"><div class="stephead"><span class="sn">1</span> Tap your class.</div>' + secButtons(false) + '</div>' +
+    '<div class="signstep"><label class="stephead" for="lid"><span class="sn">2</span> Type the 8 digit number you log in to Blackboard with.</label>' +
+      '<input id="lid" class="field" inputmode="numeric" autocomplete="off" maxlength="14" value="' + esc(f.id) + '"></div>' +
+    '<div class="btnrow"><button type="button" class="btn blue" id="lookGo">Check ›</button></div>' +
+    '<div id="lookOut" aria-live="polite" style="margin-top:14px">' + f.out + '</div>' +
+    '<p><button type="button" class="btn ghost" id="lookBack">‹ Back to the start</button></p>';
+  $('#page').innerHTML = h;
+  var lid = $('#lid'); lid.addEventListener('input', function(){ f.id = lid.value; });
+  $$('[data-sec]').forEach(function(b){ b.addEventListener('click', function(){ f.id = lid.value; st.cls.section = b.dataset.sec; renderLookup(); }); });
+  onClick('#lookBack', function(){ st.look = null; st.view = 'pages'; go(0); });
+  onClick('#lookGo', async function(){
+    f.id = lid.value; var d = normalizeId(f.id), btn = $('#lookGo');
+    if (!st.cls.section){ f.out = '<div class="fb miss">Step 1 is missing: tap your class.</div>'; renderLookup(); return; }
+    if (d.length !== 8){ f.out = '<div class="fb miss">Your number needs 8 digits. You typed ' + d.length + '.</div>'; renderLookup(); return; }
+    btn.disabled = true; btn.textContent = 'Checking…';
+    var h1; try { h1 = await sha256Hex(CONFIG.SALT1 + '|' + d); } catch(e){ h1 = null; }
+    var r = h1 ? await post({action:'lookup', h1:h1, section:st.cls.section, clientVersion:CONFIG.VERSION}, 60000) : null;
+    if (!r || !r.ok){ f.out = '<div class="fb miss">Could not reach the server. Check the Wi-Fi and try again.</div>'; renderLookup(); return; }
+    if (!Array.isArray(r.found)){ f.out = '<div class="fb note"><b>The check is not available right now.</b> Your screenshot of the Saved page is your proof. Try again later.</div>'; renderLookup(); return; }
+    var mine = r.found.filter(function(x){ return x.activity === CONFIG.ACTIVITY; });
+    var fmt = function(iso){ var dd = new Date(iso); return isNaN(dd) ? String(iso) : dd.toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}); };
+    if (!mine.length) f.out = '<div class="fb note"><b>No record</b> for this number in ' + esc(secLabel(st.cls.section)) + ' for Fix the Email. If you did the class version, email Professor Calafiore with the date and the time you did it.</div>';
+    else {
+      var x = mine[0];
+      f.out = x.submittedAt ? '<div class="fb good"><b>✅ Saved</b> on ' + esc(fmt(x.submittedAt)) + '. Record ID <b>' + esc(shortId(x.recordId)) + '</b>.</div>'
+        : '<div class="fb note"><b>Started</b> on ' + esc(fmt(x.startedAt)) + ' but <b>not finished</b>. Nothing was saved at the end.</div>';
+    }
+    renderLookup();
+  });
+}
+
+/* ================= CONTENT ================= */
+var TYLER = {
+  from:"Tyler Reyes", to:"Jennifer Alvarez",
+  subjectBefore:"hey", subjectAfter:"Shift swap request for Nov 6 and 7",
+  greeting:"Hi Jennifer,",
+  chatter:["Hope your week is going okay.","I know things have been crazy with the fall rush, and I wanted to say thanks for being so understanding about my schedule lately."],
+  askBefore:["So my sister is getting married on Saturday the 7th and I have to drive to Albany on Friday, which means I can't make my Friday evening shift or my Saturday morning shift."],
+  askAfter:"I need to swap two shifts for my sister's wedding on Saturday, November 7.",
+  sections:[
+    { header:"Shift swap", list:"numbered",
+      proseBefore:["I was thinking maybe Marisol could cover Friday since she said she wanted more hours, and I could take her Tuesday shift next week to make up for it."],
+      itemsAfter:["Friday, November 6, 5 to 9 pm: Marisol has offered to cover.","Saturday, November 7, 8 am to noon: still open.","Tuesday, November 10: I can take Marisol's shift to make up the hours."] },
+    { header:"Two quick questions", list:"bullets",
+      proseBefore:["Also I never got the new W-4 form you mentioned at the meeting, and I'm not sure if I need to fill it out again or if the old one is fine.","Also I think my badge expired because it beeped at me and wouldn't open the back door on Thursday."],
+      itemsAfter:["Do I need to fill out the new W-4 form again?","Can my badge be reset? It would not open the back door on Thursday."] }
+  ],
+  closingBefore:["Anyway let me know what you think, I know it's a lot.","Thanks so much."],
+  closingAfter:["Could you confirm the Saturday coverage by Wednesday so I can book the drive?","Thank you, Jennifer."],
+  sigBefore:"Tyler",
+  sigAfter:["Tyler Reyes","Sales associate, Page & Pine Books","860 555 0147"]
+};
+var OLIVIA = {
+  from:"Olivia Park", to:"Jennifer Alvarez",
+  subjectBefore:"question", subjectAfter:"Harvest Fest calendar: two things I need by Wednesday",
+  greeting:"Hi Jennifer,",
+  chatter:["I hope you had a good weekend.","I really enjoyed the client meeting on Thursday, it was great to see how you handled the pricing questions."],
+  askBefore:["I'm emailing because the draft of the Harvest Fest social media calendar is due Friday and I'm stuck on two things."],
+  askAfter:"The Harvest Fest social media calendar is due Friday, and I need two things from you to finish it.",
+  sections:[
+    { header:"What I need", list:"numbered",
+      proseBefore:["The first one is I don't have access to the Canva team folder so I can't open last year's templates.","The second thing is the photographer sent 200 photos and I'm not sure if you want me to pick ten or send you all of them."],
+      itemsAfter:["Access to the Canva team folder, so I can open last year's templates.","Your call on the photos: should I pick ten, or send you all 200?"] },
+    { header:"Two heads ups", list:"bullets",
+      proseBefore:["Also my laptop keeps shutting down randomly so if I'm slow to reply that's why, I put in a ticket with IT.","Oh and I booked the small conference room for Thursday at 2 for our check in."],
+      itemsAfter:["My laptop shuts down at random. IT has a ticket, so I may be slow to reply.","I booked the small conference room for our Thursday check in at 2 pm."] }
+  ],
+  closingBefore:["Let me know whenever you get a chance.","Thanks!"],
+  closingAfter:["Could you grant the Canva access by Wednesday so I can finish the draft on time?","Thank you!"],
+  sigBefore:"Olivia",
+  sigAfter:["Olivia Park","Marketing intern, Harvest Fest team","860 555 0190"]
+};
+var SAM = {
+  from:"Sam Okafor", to:"Jennifer Alvarez", subject:"stuff",
+  body:["Hi Jennifer, hope you're doing well, sorry to bother you I know you're slammed.",
+    "So the thing is the Saturday story time event is coming up on the 24th and we still don't have the craft supplies, I checked the back and there's only like 10 glue sticks and no construction paper.",
+    "Also the sign up sheet online shows 42 kids but the room only fits 30 so I'm not sure what to do about that, do we cap it or do two sessions.",
+    "Also the author (Mara Lin) emailed asking what time she should get there and I didn't know what to tell her.",
+    "Also I can stay late Friday to set up if that helps.",
+    "Let me know. Thanks, Sam"]
+};
+var ALL = {subject:true, opening:true, headers:true, numbered:true, bullets:true, closing:true, signature:true};
+var A1 = {opening:true}, A2 = {opening:true, subject:true}, A3 = {opening:true, subject:true, headers:true}, A4 = {opening:true, subject:true, headers:true, numbered:true}, A5 = {opening:true, subject:true, headers:true, numbered:true, bullets:true}, A6 = {opening:true, subject:true, headers:true, numbered:true, bullets:true, closing:true};
+
+var PAGES = [
+  {type:'start'},
+  /* ---------- PART 1: watch Tyler's email change ---------- */
+  {type:'learn1'},
+  {type:'check', part:1, step:'The email as is', flags:{}, spot:'find', tapAsk:true,
+   plain:'This is a real kind of email. <b>Nine sentences</b>. One block. Jennifer, the manager, opens it on her phone between two meetings.',
+   job:'Find the ask. Tap the one sentence Jennifer needs.',
+   good:'Yes. Sentence <b>four</b>. Jennifer read three sentences of warm up before she learned why Tyler wrote.',
+   miss:'Not that one. That sentence is warm up or detail. Which sentence tells Jennifer <b>why Tyler wrote</b>?'},
+  {type:'check', part:1, step:'Direct opening', flags:A1, spot:'opening', lift:true,
+   plain:'The ask moved to the <b>first line</b>. One sentence. What he needs and <b>when</b>. This is called a <b>direct opening</b>.',
+   job:'Why does the ask go first?',
+   opts:[{t:'So Jennifer can decide before she reads anything else.', ok:true, why:'Right. She knows what the email is for in one line. Everything after it is detail.'},
+         {t:'Because getting to the point is more polite.', why:'It is polite, but that is not the reason. The reason is what it does for the reader: she can decide right away.'},
+         {t:'Because the email gets shorter that way.', why:'The email does get shorter, but that is a side effect. The point is that Jennifer can decide from line one.'}]},
+  {type:'check', part:1, step:'Subject line', flags:A2, spot:'subject',
+   plain:'The subject line is the opening in <b>five words</b>. Say <b>what</b> it is about and <b>when</b>.',
+   job:'Which subject line is the best?',
+   opts:[{t:'Shift swap request for Nov 6 and 7', ok:true, why:'Topic and dates. Jennifer knows what it is before she opens it.'},
+         {t:'hey', why:'No topic, no date. On a phone, this looks like spam or a text.'},
+         {t:'Something I need to ask you about my schedule', why:'Closer, but "something" hides the topic. Name it: shift swap, and the dates.'}]},
+  {type:'check', part:1, step:'Bold headers', flags:A3, spot:'sections',
+   plain:'Two headers. Before Jennifer reads a word, she knows there are <b>two topics</b>. She can <b>skim</b> to the one she cares about.',
+   job:'What do the two headers let Jennifer do?',
+   opts:[{t:'Skim to the topic she cares about, without reading everything.', ok:true, why:'Right. Headers are signposts. She can go straight to "Shift swap" and come back to the questions later.'},
+         {t:'Skip the email because it looks organized.', why:'Organized is good, but headers are not a reason to skip. They are a map for reading faster.'},
+         {t:'Reply faster because the email is shorter.', why:'The email is not shorter with headers. It is easier to find things in. That is a different benefit.'}]},
+  {type:'check', part:1, step:'Numbered list', flags:A4, spot:'sec0',
+   plain:'<b>Numbers</b> when the order or the count matters. Three dates, in date order. Jennifer can answer by number: "Yes to 1 and 3, I will find someone for 2."',
+   job:'Why numbers here and not bullets?',
+   opts:[{t:'The order and the count matter: three dates, in date order.', ok:true, why:'Right. And numbers give Jennifer a way to answer: by number.'},
+         {t:'Numbers look more professional than bullets.', why:'Not about looks. Numbers carry meaning: this is first, this is second. Bullets do not.'},
+         {t:'Any list with three or more items gets numbers.', why:'No. Three equal items can be bullets. Numbers are for order or count.'}]},
+  {type:'check', part:1, step:'Bullet points', flags:A5, spot:'sec1',
+   plain:'<b>Bullets</b> when the items are equal and the order does not matter. Two questions. Either one first. Both are written the <b>same way</b>: that is <b>parallelism</b>.',
+   job:'Why bullets here?',
+   opts:[{t:'The two questions are equal. Either one can come first.', ok:true, why:'Right. No order, no count. Bullets say "these are a set."'},
+         {t:'Questions always get bullets.', why:'There is no such rule. If the questions had to be answered in order, they would get numbers.'},
+         {t:'Bullets are for short items only.', why:'Length is not the test. Order is. Equal items with no order get bullets.'}]},
+  {type:'check', part:1, step:'Closing', flags:A6, spot:'closing',
+   plain:'A closing is not a goodbye. It is <b>one next step</b> with a <b>date</b>. Jennifer knows what to do and <b>by when</b>.',
+   job:'Which closing is the best?',
+   opts:[{t:'Could you confirm the Saturday coverage by Wednesday so I can book the drive?', ok:true, why:'One action (confirm), one date (Wednesday), one reason (book the drive). Jennifer knows exactly what to do.'},
+         {t:'Anyway let me know what you think, I know it\'s a lot.', why:'"Let me know what you think" is not an action. No date. Jennifer can put this off forever.'},
+         {t:'Thanks so much for everything!!', why:'Friendly, but it asks for nothing. The email ends without telling Jennifer what happens next.'}]},
+  {type:'check', part:1, step:'Signature line', flags:ALL, spot:'signature',
+   plain:'Name, role, one way to reach him. Jennifer never has to <b>look him up</b>.',
+   job:'Which signature line is the best?',
+   opts:[{t:'Tyler Reyes · Sales associate, Page & Pine Books · 860 555 0147', ok:true, why:'Full name, role, one contact line. If Jennifer wants to call, the number is right there.'},
+         {t:'Tyler', why:'Which Tyler? Jennifer may manage two. No role, no number.'},
+         {t:'Sent from my iPhone', why:'That is the phone talking, not Tyler. It tells Jennifer nothing about who wrote the email.'}]},
+  {type:'compare', pts:2},
+  /* ---------- PART 2: fix Olivia's email ---------- */
+  {type:'learn2'},
+  {type:'decide', step:'Subject line', fix:'subject', pts:1,
+   job:'Pick the best subject line for Olivia\'s email.',
+   opts:[{t:'Harvest Fest calendar: two things I need by Wednesday', ok:true, why:'Topic, count, and a date. Jennifer can tell from her inbox that this needs an answer this week.'},
+         {t:'question', why:'No topic, no date. This sits unopened under twenty other emails.'},
+         {t:'Hi Jennifer! Quick things', why:'Friendly, but "quick things" hides what the email is about. Name the topic.'}]},
+  {type:'decide', step:'Direct opening', fix:'opening', pts:1,
+   job:'Pick the best first line after "Hi Jennifer,".',
+   opts:[{t:'The Harvest Fest social media calendar is due Friday, and I need two things from you to finish it.', ok:true, why:'What it is about, the deadline, and what Olivia needs. Jennifer can decide from line one.'},
+         {t:'I hope you had a good weekend! I really enjoyed the client meeting on Thursday.', why:'Warm up. Jennifer still does not know why Olivia wrote.'},
+         {t:'I\'m emailing because I\'m stuck and not sure what to do.', why:'This says Olivia has a problem, but not what it is. Name the task and the deadline.'}]},
+  {type:'decide', step:'Bold headers', fix:'headers', pts:1,
+   job:'Pick the headers for the body of the email.',
+   opts:[{t:'What I need  ·  Two heads ups', ok:true, why:'Two topics, two headers. Jennifer sees the shape of the email before reading it.'},
+         {t:'Canva  ·  Photos  ·  Laptop  ·  Conference room', why:'Four headers for four sentences is too many. Headers group things. These just label every line.'},
+         {t:'Update', why:'One header on a whole email is no help. It does not tell Jennifer where anything is.'}]},
+  {type:'decide', step:'Numbers or bullets', fix:'lists', pts:1,
+   job:'Under "What I need" there are two requests. Under "Two heads ups" there are two notes. Which list goes where?',
+   opts:[{t:'Numbers for "What I need." Bullets for "Two heads ups."', ok:true, why:'The two requests are a count Jennifer must answer ("done with 1, thinking about 2"). The heads ups are equal notes: bullets.'},
+         {t:'Bullets for both.', why:'Close. But Jennifer has to reply to the two requests. Numbers let her answer by number.'},
+         {t:'Numbers for both.', why:'The heads ups are not steps or a count. Numbers on them promise an order that is not there.'}]},
+  {type:'decide', step:'Closing and signature', fix:'closing', pts:1,
+   job:'Pick the best closing. The signature line gets filled in with it.',
+   opts:[{t:'Could you grant the Canva access by Wednesday so I can finish the draft on time?', ok:true, why:'One action, one date, one reason. And the signature now says who Olivia is and how to reach her.'},
+         {t:'Let me know whenever you get a chance.', why:'"Whenever" means never. The draft is due Friday. The closing has to say when.'},
+         {t:'Thanks in advance for all your help!!', why:'Pleasant, but it asks for nothing. Jennifer closes the email not knowing what to do.'}]},
+  /* ---------- PART 3: write your own ---------- */
+  {type:'learn3'},
+  {type:'write', pts:3},
+  {type:'end'}
+];
+var MAXPTS = PAGES.reduce(function(s, p){ return s + (p.pts || 0); }, 0);
+
+/* ================= STATE ================= */
+var st;
+function fresh(){
+  st = {i:0, view:'pages', pg:PAGES.map(function(p){
+    var s = {done:false, points:0, tries:0, firstTry:null};
+    if (p.opts) s.order = shuffle(p.opts.map(function(_, k){ return k; }));
+    if (p.type === 'write') s.w = {subject:'', opening:'', body:'', closing:'', signature:'', locked:false};
+    return s; }), cls:newCls()};
+}
+function total(){ return st.pg.reduce(function(s, x){ return s + (x.done ? x.points : 0); }, 0); }
+function writeState(){ var i = PAGES.findIndex(function(p){ return p.type === 'write'; }); return st.pg[i].w; }
+function decidedFlags(upto){
+  var f = {};
+  PAGES.forEach(function(p, i){ if (p.type === 'decide' && i < upto && st.pg[i].done){ applyFix(f, p.fix); } });
+  return f;
+}
+function applyFix(f, fix){
+  if (fix === 'lists'){ f.numbered = true; f.bullets = true; }
+  else if (fix === 'closing'){ f.closing = true; f.signature = true; }
+  else f[fix] = true;
+}
+
+/* ================= EMAIL RENDER ================= */
+function sentHTML(arr, cls, startIdx){
+  return arr.map(function(s, k){ return '<span class="sent ' + (cls || '') + '" data-si="' + ((startIdx || 0) + k) + '">' + esc(s) + '</span>'; }).join(' ');
+}
+function pill(show, label){ return show ? '<span class="pill">' + label + '</span>' : ''; }
+function renderEmail(d, f, opts){
+  opts = opts || {}; var P = opts.pills || {};
+  var h = '';
+  var subjOn = !!f.subject;
+  h += '<div class="hdr"><span class="lab">From</span><span>' + esc(d.from) + '</span><span class="lab">To</span><span>' + esc(d.to) + '</span>' +
+    '<span class="lab">Subject</span><span class="blk inl ' + (subjOn ? 'on' : '') + '" data-blk="subject" data-c="peach">' + (subjOn ? esc(d.subjectAfter) : esc(d.subjectBefore)) + pill(P.subject, 'Subject line') + '</span></div>';
+  var topBlock = !(f.opening || f.headers || f.numbered || f.bullets);
+  if (topBlock){
+    var parts = [], n = 0;
+    parts.push('<span class="sent" data-si="0">' + esc(d.greeting) + '</span>'); n = 1;
+    parts.push(sentHTML(d.chatter, '', n)); n += d.chatter.length;
+    parts.push(sentHTML(d.askBefore, 'ask', n)); n += d.askBefore.length;
+    d.sections.forEach(function(s){ parts.push(sentHTML(s.proseBefore, '', n)); n += s.proseBefore.length; });
+    if (!f.closing){ parts.push(sentHTML(d.closingBefore, '', n)); n += d.closingBefore.length; }
+    if (!f.signature){ parts.push('<span class="sent" data-si="' + n + '">' + esc(d.sigBefore) + '</span>'); }
+    h += '<div class="blk" data-blk="orig"><p>' + parts.join(' ') + '</p></div>';
+  } else {
+    if (f.opening){
+      h += '<div class="blk on" data-blk="opening" data-c="blue"><p>' + esc(d.greeting) + '</p><p class="open-line">' + esc(d.askAfter) + '</p>' + pill(P.opening, 'Direct opening') + '</div>';
+    } else {
+      h += '<div class="blk" data-blk="top"><p>' + esc(d.greeting) + ' ' + sentHTML(d.chatter) + ' ' + sentHTML(d.askBefore, 'ask') + '</p></div>';
+    }
+    d.sections.forEach(function(s, i){
+      var listOn = (s.list === 'numbered' && f.numbered) || (s.list === 'bullets' && f.bullets);
+      var on = f.headers || listOn;
+      var c = listOn ? (s.list === 'numbered' ? 'butter' : 'pink') : 'lav';
+      var inner = '';
+      if (f.headers) inner += '<p class="h">' + esc(s.header) + '</p>';
+      if (listOn){ var tag = s.list === 'numbered' ? 'ol' : 'ul'; inner += '<' + tag + '>' + s.itemsAfter.map(function(it, j){ return '<li class="enter" style="animation-delay:' + (j * 150) + 'ms">' + esc(it) + '</li>'; }).join('') + '</' + tag + '>'; }
+      else inner += '<p>' + ((f.opening || f.headers) ? sentHTML(s.itemsAfter) : sentHTML(s.proseBefore)) + '</p>';
+      var label = listOn ? (s.list === 'numbered' ? 'Numbered list' : 'Bullet points') : (f.headers ? 'Bold headers' : '');
+      var showPill = P['sec' + i] || (P.sections && f.headers && i === 0);
+      h += '<div class="blk ' + (on ? 'on' : '') + '" data-blk="sec' + i + '" data-c="' + c + '">' + inner + pill(showPill && label, label) + '</div>';
+    });
+    if (!f.closing) h += '<div class="blk" data-blk="closing"><p>' + sentHTML(d.closingBefore) + '</p></div>';
+    if (!f.signature) h += '<div class="blk" data-blk="signature"><p>' + esc(d.sigBefore) + '</p></div>';
+  }
+  if (f.closing) h += '<div class="blk on" data-blk="closing" data-c="peri"><p>' + esc(d.closingAfter[0]) + '</p><p>' + esc(d.closingAfter[1]) + '</p>' + pill(P.closing, 'Closing') + '</div>';
+  if (f.signature) h += '<div class="blk on sig" data-blk="signature" data-c="cream">' + d.sigAfter.map(function(l, i){ return '<p class="' + (i ? '' : 'name') + '">' + esc(l) + '</p>'; }).join('') + pill(P.signature, 'Signature line') + '</div>';
+  return '<div class="email" id="' + (opts.id || 'em') + '"' + (opts.spot ? ' data-spot="' + opts.spot + '"' : '') + '>' + h + '</div>';
+}
+function lightUp(em, spot){
+  if (!em || !spot || spot === 'find') return;
+  var keys = spot === 'sections' ? ['sec0', 'sec1'] : [spot];
+  keys.forEach(function(k){ var el = em.querySelector('[data-blk="' + k + '"]'); if (el) el.classList.add('lit'); });
+}
+function spotPills(spot){ var P = {}; if (spot && spot !== 'find') P[spot] = true; return P; }
+function flash(em, keys){ keys.forEach(function(k){ var el = em.querySelector('[data-blk="' + k + '"]'); if (el) el.classList.add('flash'); }); }
+
+/* lift animation: the ask sentence floats up to become the opening */
+var liftFrom = null;
+function captureAsk(){ var el = document.querySelector('.sent.ask'); if (!el) return null; var r = el.getBoundingClientRect(); return {x:r.left + window.scrollX, y:r.top + window.scrollY}; }
+function playLift(){
+  if (!liftFrom) return;
+  var to = document.querySelector('.open-line'); var from = liftFrom; liftFrom = null;
+  if (!to) return;
+  var r = to.getBoundingClientRect();
+  var dx = from.x - (r.left + window.scrollX), dy = from.y - (r.top + window.scrollY);
+  to.style.transition = 'none'; to.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+  void to.getBoundingClientRect();
+  to.classList.add('lift'); to.style.transition = '';
+  requestAnimationFrame(function(){ to.style.transform = ''; });
+}
+
+/* ================= PAGES ================= */
+function sticky(){
+  return '<div class="sticky">"Half my inbox is a wall of text. I open an email and I cannot find what the person wants. Can you show the new hires how to lay one out?"<span class="sig">Jennifer, store manager</span></div>';
+}
+function renderStart(){
+  return '<h1>Fix the Email</h1>' +
+    '<p class="lrow">You are the <b>assistant manager</b> at <b>Page &amp; Pine Books</b>. Jennifer, the store manager, left a sticky note on your desk:</p>' + sticky() +
+    '<p class="lrow"><b>Plain words:</b> an email has four parts that do the work. The <b>opening</b> says why you wrote. The <b>body</b> is laid out so the reader can skim. The <b>closing</b> says what happens next. The <b>signature</b> says who you are.</p>' +
+    '<div class="how"><b>How this works</b><ol>' +
+    '<li><b>Part 1 (watch):</b> Tyler\'s email gets fixed one step at a time. On each page, answer one short question to continue.</li>' +
+    '<li><b>Part 2 (choose):</b> you fix Olivia\'s email yourself, one decision at a time.</li>' +
+    '<li><b>Part 3 (write):</b> you rewrite Sam\'s email in your own words. A checklist tells you when it is ready.</li></ol></div>' +
+    '<div class="how"><b>How points work</b><ol>' +
+    '<li>Points are for <b>finishing each part</b>, not for guessing right the first time.</li>' +
+    '<li>A wrong answer shows you why. Pick again and keep going.</li>' +
+    '<li>Part 1 = 2 points. Part 2 = 5 points. Part 3 = 3 points. <b>10 total.</b></li></ol></div>' +
+    '<p class="lrow">⏱️ It takes about <b>30 minutes</b>. Part 3 is the one that takes thinking.</p>' + modeBox();
+}
+function renderLearn1(){
+  return '<div class="band" style="background:var(--blue)"><div class="kicker">Part 1 of 3 · Watch</div><h1>Tyler\'s email, nine sentences, one block</h1></div>' +
+    '<p class="lrow">Tyler is a sales associate. He needs two shifts covered. He wrote this to Jennifer at 11 pm on his phone:</p>' +
+    renderEmail(TYLER, {}, {}) +
+    '<p class="lrow">Everything Jennifer needs is in there. It is just <b>buried</b>. Over the next pages you will watch this exact email get fixed, <b>one part at a time</b>. The email stays on the screen so you can see what moves.</p>' +
+    '<div class="plain">On every page: look at the email first, read the plain words box, then answer <b>one question</b>. A wrong answer is fine. It shows you why, and you pick again.</div>';
+}
+function renderCheck(p, s){
+  var h = '<div class="band" style="background:var(--blue);padding-bottom:8px"><div class="kicker">Part 1 · Step ' + (st.i - 1) + ' of 8</div><h2 style="margin:0">' + esc(p.step) + '</h2></div>';
+  h += renderEmail(TYLER, p.flags, {spot:p.spot, pills:spotPills(p.spot)});
+  h += '<div class="plain">' + p.plain + '</div>';
+  h += '<div class="job"><div class="jobtitle">Your job</div><div class="jobtext">' + esc(p.job) + '</div>' + (p.tapAsk ? '<div class="jobnote">Tap a sentence in the email above.</div>' : '') + '</div>';
+  if (p.opts) h += optsHTML(p, s);
+  h += '<div id="fbzone">' + (s.fb || '') + '</div>';
+  return h;
+}
+function optsHTML(p, s){
+  var L = 'ABC';
+  return '<div class="opts">' + s.order.map(function(k, n){
+    var o = p.opts[k], cls = '', dis = '';
+    if (s.done){ cls = o.ok ? ' good' : ''; dis = ' disabled'; }
+    else if (s.wrong && s.wrong.indexOf(k) >= 0){ cls = ' miss'; dis = ' disabled'; }
+    return '<button type="button" class="opt' + cls + '" data-k="' + k + '"' + dis + '><span class="L">' + L[n] + '</span><span>' + esc(o.t) + '</span></button>';
+  }).join('') + '</div>';
+}
+function renderCompare(){
+  return '<div class="band" style="background:var(--mint)"><div class="kicker">Part 1 · Done</div><h1>Before and after</h1></div>' +
+    '<p class="lrow">Same facts. Same Tyler. The one on the right takes Jennifer about <b>fifteen seconds</b>.</p>' +
+    '<div class="compare"><div class="col"><div class="cap">Before</div>' + renderEmail(TYLER, {}, {id:'emA'}) + '</div>' +
+    '<div class="col"><div class="cap">After</div>' + renderEmail(TYLER, ALL, {id:'emB'}) + '</div></div>' +
+    '<div class="fb good"><b>✅ Part 1 done.</b> 2 points. Now you do the fixing.</div>';
+}
+function renderLearn2(){
+  return '<div class="band" style="background:var(--lav)"><div class="kicker">Part 2 of 3 · Choose</div><h1>Olivia\'s email</h1></div>' +
+    '<p class="lrow">Olivia is a marketing intern. Her first big task is due Friday and she is stuck. She wrote this to Jennifer:</p>' +
+    renderEmail(OLIVIA, {}, {}) +
+    '<p class="lrow">You will fix it in <b>five decisions</b>: subject line, opening, headers, lists, closing. After each right choice, the email on the screen <b>changes</b>. Each decision is <b>1 point</b> when you get it right, first try or third try.</p>';
+}
+function renderDecide(p, s){
+  var fl = decidedFlags(st.i), pills = {};
+  var flShow = {}; Object.keys(fl).forEach(function(k){ flShow[k] = true; });
+  if (s.done) applyFix(flShow, p.fix);
+  Object.keys(flShow).forEach(function(k){ pills[k === 'headers' ? 'sections' : (k === 'numbered' ? 'sec0' : (k === 'bullets' ? 'sec1' : k))] = true; });
+  var n = PAGES.slice(0, st.i).filter(function(x){ return x.type === 'decide'; }).length + 1;
+  var h = '<div class="band" style="background:var(--lav);padding-bottom:8px"><div class="kicker">Part 2 · Decision ' + n + ' of 5</div><h2 style="margin:0">' + esc(p.step) + '</h2></div>';
+  h += renderEmail(OLIVIA, flShow, {pills:pills});
+  h += '<div class="job"><div class="jobtitle">Your job</div><div class="jobtext">' + esc(p.job) + '</div></div>';
+  h += optsHTML(p, s);
+  h += '<div id="fbzone">' + (s.fb || '') + '</div>';
+  return h;
+}
+function samWall(){
+  return '<div class="email"><div class="hdr"><span class="lab">From</span><span>' + esc(SAM.from) + '</span><span class="lab">To</span><span>' + esc(SAM.to) + '</span><span class="lab">Subject</span><span>' + esc(SAM.subject) + '</span></div>' +
+    '<div class="blk" data-blk="orig"><p>' + SAM.body.map(esc).join(' ') + '</p></div></div>';
+}
+function factsBox(){
+  return '<div class="facts"><b>Keep every fact.</b> Your email must still tell Jennifer:<ul>' +
+    '<li>Story time is <b>Saturday, October 24</b>.</li>' +
+    '<li>Supplies: about <b>10 glue sticks</b>, <b>no construction paper</b>.</li>' +
+    '<li><b>42 kids</b> signed up. The room fits <b>30</b>. Cap it, or two sessions?</li>' +
+    '<li>The author, <b>Mara Lin</b>, asked what time to arrive.</li>' +
+    '<li>Sam can stay late <b>Friday</b> to set up.</li></ul></div>';
+}
+function renderLearn3(){
+  return '<div class="band" style="background:var(--peach)"><div class="kicker">Part 3 of 3 · Write</div><h1>Sam\'s email, your rewrite</h1></div>' +
+    '<p class="lrow">Sam works the front desk. Story time is this Saturday and three things are going wrong. Sam typed this in a hurry:</p>' + samWall() +
+    '<p class="lrow">On the next page you rewrite it <b>in your own words</b>, as Sam. Five boxes: subject, opening, body, closing, signature. A checklist turns green as each part is ready. You can only lock it in when every box is green.</p>' +
+    factsBox() +
+    '<div class="plain">In the <b>body</b> box, type a <b>short line by itself</b> to make a header, start a line with <b>1.</b> for a numbered item, and start a line with <b>-</b> for a bullet. The preview at the end shows you how it looks.</div>';
+}
+var CHECKS = [
+  {k:'subject', t:'Subject line names the topic and the date (3 or more words).'},
+  {k:'opening', t:'Opening says why you wrote, in one or two sentences, no warm up first.'},
+  {k:'structure', t:'Body has at least one header line and at least three list lines (1. or -).'},
+  {k:'facts', t:'Body keeps the facts: 42 and 30, the supplies, and Mara Lin\'s arrival time.'},
+  {k:'closing', t:'Closing asks for one next step with a day or a deadline.'},
+  {k:'signature', t:'Signature has your full name on the first line and your role on the second.'}
+];
+function lines(s){ return String(s || '').split(/\r?\n/).map(function(x){ return x.trim(); }).filter(Boolean); }
+function isListLine(l){ return /^(\d+[.)]|[-•*])\s+/.test(l); }
+function isHeaderLine(l){ return !isListLine(l) && words(l) <= 6 && !/[.!?]\s*$/.test(l); }
+function runChecks(w){
+  var out = {};
+  var subj = String(w.subject || '').trim();
+  out.subject = words(subj) >= 3 && !/^(hey|hi|hello|stuff|question|help|quick question|update)$/i.test(subj) && /(story ?time|oct|24|saturday|event)/i.test(subj);
+  var op = String(w.opening || '').trim();
+  var opW = words(op);
+  out.opening = opW >= 8 && opW <= 45 && /(story ?time|24|saturday|event)/i.test(op) && !/^(hope|hoping|sorry|hi|hello|just|so\b|i hope|how are)/i.test(op) && (op.match(/[.!?]/g) || []).length <= 2;
+  var ls = lines(w.body);
+  var listN = ls.filter(isListLine).length, headN = ls.filter(isHeaderLine).length;
+  out.structure = headN >= 1 && listN >= 3 && words(w.body) >= 40;
+  var b = String(w.body || '');
+  out.facts = /\b42\b/.test(b) && /\b30\b/.test(b) && /(glue|paper|suppl)/i.test(b) && /(mara|author)/i.test(b) && /(time|arriv|get there|be there|show up)/i.test(b);
+  var cl = String(w.closing || '').trim();
+  out.closing = words(cl) >= 6 && /(monday|tuesday|wednesday|thursday|friday|today|tomorrow|tonight|\bby\b|before|noon|\d\s?(am|pm)|end of day|eod)/i.test(cl) && /(\?|please|could you|can you|would you|let me know by)/i.test(cl);
+  var sg = lines(w.signature);
+  out.signature = sg.length >= 2 && words(sg[0]) >= 2 && /^[A-Za-z' .-]+$/.test(sg[0]) && words(sg[1]) >= 1;
+  out.all = CHECKS.every(function(c){ return out[c.k]; });
+  return out;
+}
+function checksHTML(w){
+  var r = runChecks(w);
+  return '<div class="checks" id="checks"><div class="ct">Checklist · ' + CHECKS.filter(function(c){ return r[c.k]; }).length + ' of 6 ready</div>' +
+    CHECKS.map(function(c){ return '<div class="ck' + (r[c.k] ? ' ok' : '') + '"><span class="box">' + (r[c.k] ? '✓' : '') + '</span><span>' + c.t + '</span></div>'; }).join('') + '</div>';
+}
+function previewHTML(w){
+  var ls = lines(w.body), body = '', open = null;
+  function close(){ if (open){ body += '</' + open + '>'; open = null; } }
+  ls.forEach(function(l){
+    if (/^\d+[.)]\s+/.test(l)){ if (open !== 'ol'){ close(); body += '<ol>'; open = 'ol'; } body += '<li>' + esc(l.replace(/^\d+[.)]\s+/, '')) + '</li>'; }
+    else if (/^[-•*]\s+/.test(l)){ if (open !== 'ul'){ close(); body += '<ul>'; open = 'ul'; } body += '<li>' + esc(l.replace(/^[-•*]\s+/, '')) + '</li>'; }
+    else if (isHeaderLine(l)){ close(); body += '<p class="h">' + esc(l) + '</p>'; }
+    else { close(); body += '<p>' + esc(l) + '</p>'; }
+  });
+  close();
+  return '<div class="email"><div class="hdr"><span class="lab">From</span><span>Sam Okafor</span><span class="lab">To</span><span>Jennifer Alvarez</span><span class="lab">Subject</span><span class="blk inl on" data-blk="subject" data-c="peach">' + esc(w.subject) + '</span></div>' +
+    '<div class="blk on" data-blk="opening" data-c="blue"><p>Hi Jennifer,</p><p class="open-line">' + esc(w.opening) + '</p></div>' +
+    '<div class="blk on" data-c="lav">' + body + '</div>' +
+    '<div class="blk on" data-blk="closing" data-c="peri">' + lines(w.closing).map(function(l){ return '<p>' + esc(l) + '</p>'; }).join('') + '</div>' +
+    '<div class="blk on sig" data-blk="signature" data-c="cream">' + lines(w.signature).map(function(l, i){ return '<p class="' + (i ? '' : 'name') + '">' + esc(l) + '</p>'; }).join('') + '</div></div>';
+}
+function renderWrite(p, s){
+  var w = s.w;
+  var h = '<div class="band" style="background:var(--peach);padding-bottom:8px"><div class="kicker">Part 3 · Write</div><h2 style="margin:0">Rewrite Sam\'s email</h2></div>';
+  if (w.locked){
+    h += '<div class="fb good"><b>✅ Locked in.</b> Part 3 done, 3 points. Here is your email as Jennifer would see it:</div>' + previewHTML(w) +
+      '<p class="small">Press <b>Finish ›</b> at the bottom to save your result.</p>';
+    return h;
+  }
+  h += '<details style="margin-bottom:14px"><summary style="cursor:pointer;font-weight:700">Show Sam\'s original email and the facts</summary>' + samWall() + factsBox() + '</details>';
+  h += '<div class="job"><div class="jobtitle">Your job</div><div class="jobtext">Write the email Sam should have sent. Your words, not Sam\'s. Write as Sam, to Jennifer.</div></div>';
+  h += '<label class="wlab" for="wsub">Subject line <span>· topic and date</span></label><input id="wsub" class="field" autocomplete="off" value="' + esc(w.subject) + '">';
+  h += '<label class="wlab" for="wopen">Opening <span>· the first line after "Hi Jennifer,"</span></label><textarea id="wopen" class="field" style="min-height:80px">' + esc(w.opening) + '</textarea><p class="hint">One or two sentences. Why you wrote, and when it matters.</p>';
+  h += '<label class="wlab" for="wbody">Body <span>· headers, numbered list, bullets</span></label><textarea id="wbody" class="field" style="min-height:260px" placeholder="A short line by itself = header&#10;1. a numbered item&#10;2. another&#10;- a bullet">' + esc(w.body) + '</textarea><p class="hint">Keep every fact from the sticky list. Group them under headers. Use 1. 2. 3. where Jennifer has to decide, and - for notes.</p>';
+  h += '<label class="wlab" for="wclose">Closing <span>· one next step with a day</span></label><textarea id="wclose" class="field" style="min-height:80px">' + esc(w.closing) + '</textarea>';
+  h += '<label class="wlab" for="wsig">Signature <span>· name on line 1, role on line 2</span></label><textarea id="wsig" class="field" style="min-height:80px">' + esc(w.signature) + '</textarea>';
+  h += '<div id="ckwrap">' + checksHTML(w) + '</div>';
+  h += '<div class="btnrow"><button class="btn blue" type="button" id="lockBtn"' + (runChecks(w).all ? '' : ' disabled') + '>🔒 Lock in my email</button><span class="small">Locking in cannot be undone.</span></div>';
+  return h;
+}
+function renderEnd(){
+  var t = total();
+  var w = writeState();
+  return '<div class="band" style="background:var(--mint)"><div class="kicker">Finished</div><h1>You fixed three emails</h1></div>' +
+    '<div class="bigscore">⭐ ' + t + ' of ' + MAXPTS + ' points</div>' +
+    endStatus() +
+    '<div class="how"><b>The four parts, one more time</b><ol>' +
+    '<li><b>Opening:</b> why you wrote, in line one.</li>' +
+    '<li><b>Body:</b> headers to skim, numbers where order or count matters, bullets for equal items.</li>' +
+    '<li><b>Closing:</b> one next step with a date.</li>' +
+    '<li><b>Signature:</b> name, role, one way to reach you.</li></ol></div>' +
+    (w.locked ? '<h2 style="margin-top:20px">Your rewrite</h2>' + previewHTML(w) : '');
+}
+
+/* ================= ENGINE ================= */
+function render(){
+  if (st.view === 'signin'){ renderSignin(); save(); return; }
+  if (st.view === 'lookup'){ renderLookup(); return; }
+  showNav(true);
+  var p = PAGES[st.i], s = st.pg[st.i], h = '';
+  if (p.type === 'start') h = renderStart();
+  else if (p.type === 'learn1') h = renderLearn1();
+  else if (p.type === 'check') h = renderCheck(p, s);
+  else if (p.type === 'compare') h = renderCompare();
+  else if (p.type === 'learn2') h = renderLearn2();
+  else if (p.type === 'decide') h = renderDecide(p, s);
+  else if (p.type === 'learn3') h = renderLearn3();
+  else if (p.type === 'write') h = renderWrite(p, s);
+  else if (p.type === 'end') h = renderEnd();
+  var pg = $('#page');
+  pg.innerHTML = whoStrip(p) + h;
+  pg.style.animation = 'none'; void pg.offsetWidth; pg.style.animation = '';
+  if (p.type === 'learn1' || p.type === 'learn2' || p.type === 'learn3' || p.type === 'compare'){ if (!s.done){ s.done = true; s.points = p.pts || 0; if (p.pts) bumpPoints(); } }
+  if (p.type === 'end' && isClass() && !(st.cls.submitted && st.cls.submitted.ok) && !st.cls.submitting) submitFinal();
+  bind(p, s);
+  nav(); modeTag(); save();
+  var em = $('#em'); if (em) lightUp(em, p.spot);
+  playLift();
+}
+function bumpPoints(){ var el = $('#points'); if (!el) return; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+function bind(p, s){
+  if (p.type === 'start'){
+    onClick('#goClass', function(){ st.view = 'signin'; st.form = null; render(); });
+    onClick('#goPractice', function(){ st.cls = newCls(); st.cls.mode = 'practice'; go(1); });
+    onClick('#goLookup', function(){ st.view = 'lookup'; st.look = null; render(); });
+    onClick('#toClass', function(){ fresh(); st.view = 'signin'; render(); });
+  }
+  if (p.type === 'check' && p.tapAsk && !s.done){
+    $$('#em .sent').forEach(function(el){
+      el.classList.add('tap');
+      el.addEventListener('click', function(){
+        if (s.done) return;
+        s.tries = (s.tries || 0) + 1;
+        var right = el.classList.contains('ask');
+        if (right){
+          s.done = true; if (s.firstTry == null) s.firstTry = 1;
+          $$('#em .sent').forEach(function(x){ x.classList.remove('tap', 'nope'); });
+          el.classList.add('hit');
+          s.fb = '<div class="fb good">' + p.good + '</div>';
+        } else {
+          if (s.firstTry == null) s.firstTry = 0;
+          el.classList.remove('tap'); el.classList.add('nope');
+          s.fb = '<div class="fb miss">' + p.miss + '</div>';
+        }
+        $('#fbzone').innerHTML = s.fb; nav(); save();
+      });
+    });
+  }
+  if (p.opts && !s.done){
+    $$('.opt').forEach(function(b){
+      b.addEventListener('click', function(){
+        if (s.done) return;
+        var k = +b.dataset.k, o = p.opts[k];
+        s.tries = (s.tries || 0) + 1;
+        if (o.ok){
+          s.done = true; if (s.firstTry == null) s.firstTry = 1;
+          s.fb = '<div class="fb good"><b>✅ ' + (p.type === 'decide' ? '1 point. ' : '') + '</b>' + esc(o.why) + '</div>';
+          if (p.type === 'decide'){ s.points = p.pts; bumpPoints(); }
+          render();
+          if (p.type === 'decide'){
+            var em = $('#em'); var keys = {subject:['subject'], opening:['opening'], headers:['sec0', 'sec1'], lists:['sec0', 'sec1'], closing:['closing', 'signature']}[p.fix];
+            if (em) flash(em, keys);
+            if (p.fix === 'opening') { /* already rendered; show a settle animation */ var ol = $('.open-line'); if (ol){ ol.classList.add('enter'); } }
+          }
+        } else {
+          if (s.firstTry == null) s.firstTry = 0;
+          s.wrong = (s.wrong || []).concat([k]);
+          s.fb = '<div class="fb miss"><b>Not that one.</b> ' + esc(o.why) + ' Pick again.</div>';
+          b.classList.add('miss'); b.disabled = true;
+          $('#fbzone').innerHTML = s.fb; save();
+        }
+      });
+    });
+  }
+  if (p.type === 'write' && !s.w.locked){
+    var w = s.w;
+    var upd = function(){
+      w.subject = $('#wsub').value; w.opening = $('#wopen').value; w.body = $('#wbody').value; w.closing = $('#wclose').value; w.signature = $('#wsig').value;
+      $('#ckwrap').innerHTML = checksHTML(w);
+      $('#lockBtn').disabled = !runChecks(w).all;
+      save();
+    };
+    ['#wsub', '#wopen', '#wbody', '#wclose', '#wsig'].forEach(function(id){ $(id).addEventListener('input', upd); });
+    onClick('#lockBtn', function(){
+      upd(); if (!runChecks(w).all) return;
+      if (!confirm('Lock in your email? You cannot change it after this.')) return;
+      w.locked = true; s.done = true; s.points = p.pts; bumpPoints(); render(); window.scrollTo(0, 0);
+    });
+  }
+  if (p.type === 'end'){ onClick('#restart', function(){ fresh(); render(); }); }
+}
+function canNext(){
+  var p = PAGES[st.i], s = st.pg[st.i];
+  if (p.type === 'start') return !!st.cls.mode;
+  if (p.type === 'check' || p.type === 'decide' || p.type === 'write') return !!s.done;
+  if (p.type === 'end') return false;
+  return true;
+}
+function nav(){
+  var p = PAGES[st.i];
+  var back = $('#back'), next = $('#next'), msg = $('#navmsg');
+  back.disabled = st.i === 0 || p.type === 'end';
+  next.disabled = !canNext();
+  next.textContent = p.type === 'write' ? 'Finish ›' : 'Next ›';
+  if (p.type === 'start') msg.innerHTML = st.cls.mode ? 'Press Next to begin' : 'Choose a version above to begin';
+  else if (p.type === 'check') msg.innerHTML = st.pg[st.i].done ? 'Good. Press Next.' : (p.tapAsk ? 'Tap the sentence in the email' : 'Answer the question to continue');
+  else if (p.type === 'decide') msg.innerHTML = st.pg[st.i].done ? 'Fixed. Press Next.' : 'Pick the best option';
+  else if (p.type === 'write') msg.innerHTML = st.pg[st.i].done ? 'Press Finish to save' : 'Lock in your email first';
+  else if (p.type === 'end') msg.innerHTML = '';
+  else msg.innerHTML = 'Press Next when you are ready';
+  var done = st.i, totalPages = PAGES.length - 1;
+  $('#barfill').style.width = Math.round(100 * done / totalPages) + '%';
+  $('#pcount').textContent = 'Page ' + (st.i + 1) + ' of ' + PAGES.length;
+  $('#points').textContent = total() + ' of ' + MAXPTS + ' points';
+}
+function go(i){
+  if (i < 0 || i >= PAGES.length) return;
+  var p = PAGES[i];
+  if (p.type === 'check' && p.lift) liftFrom = captureAsk(); else liftFrom = null;
+  st.i = i; st.view = 'pages';
+  render();
+  window.scrollTo(0, 0);
+  if (liftFrom) playLift();
+}
+$('#next').addEventListener('click', function(){ if (canNext()) go(st.i + 1); });
+$('#back').addEventListener('click', function(){ if (st.i > 0) go(st.i - 1); });
+
+/* ================= BOOT ================= */
+fresh();
+if (!restore()) fresh();
+render();
+window.__fix = {st:function(){ return st; }, go:go, PAGES:PAGES, MAXPTS:MAXPTS, CONFIG:CONFIG, runChecks:runChecks};
+</script>
+</body>
+</html>
