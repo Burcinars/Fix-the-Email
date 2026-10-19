@@ -364,7 +364,7 @@ async function submitFinal(){
     startedAt:c.startedAt, score:total(), maxScore:MAXPTS,
     practicePicks:pts, practiceExplored:tries,
     checkAnswers:[clip(w.subject, 200), clip(w.opening, 400), clip(w.body, 1500), clip(w.closing, 300), clip(w.signature, 200)],
-    checkStatuses:[w.locked ? 'rewrite locked in' : 'rewrite not locked', 'words ' + words(w.body)]};
+    checkStatuses:[w.locked ? 'rewrite locked in' : 'rewrite not locked', 'words ' + words(w.body), 'checks ' + (w.checks != null ? w.checks : runChecks(w).count) + '/6']};
   var r = await post(payload, 60000);
   c.submitting = false;
   if (r && r.ok){ c.submitted = r; c.recordId = r.recordId || c.recordId; c.submitError = null; }
@@ -753,46 +753,56 @@ function renderLearn3(){
     '<div class="plain">In the <b>body</b> box, type a <b>short line by itself</b> to make a header, start a line with <b>1.</b> for a numbered item, and start a line with <b>-</b> for a bullet. The preview at the end shows you how it looks.</div>';
 }
 var CHECKS = [
-  {k:'subject', t:'Subject line names the topic and the date (3 or more words).'},
-  {k:'opening', t:'Opening says why you wrote, in one or two sentences, no warm up first.'},
-  {k:'structure', t:'Body has at least one header line and at least three list lines (1. or -).'},
-  {k:'facts', t:'Body keeps the facts: 42 and 30, the supplies, and Mara Lin\'s arrival time.'},
-  {k:'closing', t:'Closing asks for one next step with a day or a deadline.'},
-  {k:'signature', t:'Signature has your full name on the first line and your role on the second.'}
+  {k:'subject',   t:'Subject line names the topic (3 or more words).',
+   hint:'Say what the email is about, for example: Story time on Saturday, three things I need.'},
+  {k:'opening',   t:'Opening says why you wrote, without warm up first.',
+   hint:'Start with the reason, not with Hope, Sorry, or Hi. One or two sentences is plenty.'},
+  {k:'structure', t:'Body has a header and a list.',
+   hint:'A short line by itself is a header, for example: What I need. Start list lines with 1. or - (a dash and a space).'},
+  {k:'facts',     t:'The facts are still there: 42 and 30, the supplies, Mara Lin.',
+   hint:'Somewhere in your email Jennifer needs: 42 kids, room for 30, the glue sticks or paper, and Mara Lin\'s question.'},
+  {k:'closing',   t:'Closing asks for one next step with a day or a deadline.',
+   hint:'Ask for something and say when, for example: Could you answer these by Thursday?'},
+  {k:'signature', t:'Signature has a name on line 1 and a role on line 2.',
+   hint:'Line 1: Sam Okafor. Press Enter. Line 2: Front desk, Page and Pine Books.'}
 ];
 function lines(s){ return String(s || '').split(/\r?\n/).map(function(x){ return x.trim(); }).filter(Boolean); }
-function isListLine(l){ return /^(\d+[.)]|[-•*])\s+/.test(l); }
-function isHeaderLine(l){ return !isListLine(l) && words(l) <= 6 && !/[.!?]\s*$/.test(l); }
+function isListLine(l){ return /^(\d+\s*[.):-]|[-•*–—·]|[a-zA-Z][.)])\s*\S/.test(l); }
+function isHeaderLine(l){ return !isListLine(l) && words(l) <= 8 && (!/[.!?]\s*$/.test(l) || /:\s*$/.test(l)); }
 function runChecks(w){
   var out = {};
   var subj = String(w.subject || '').trim();
-  out.subject = words(subj) >= 3 && !/^(hey|hi|hello|stuff|question|help|quick question|update)$/i.test(subj) && /(story ?time|oct|24|saturday|event)/i.test(subj);
-  var op = String(w.opening || '').trim();
+  out.subject = words(subj) >= 3 && !/^(hey|hi|hello|stuff|question|help|quick question|update)\W*$/i.test(subj);
+  var op = String(w.opening || '').trim().replace(/^(hi|hello|hey|dear)\s+jennifer[,.!]?\s*/i, '');
   var opW = words(op);
-  out.opening = opW >= 8 && opW <= 45 && /(story ?time|24|saturday|event)/i.test(op) && !/^(hope|hoping|sorry|hi|hello|just|so\b|i hope|how are)/i.test(op) && (op.match(/[.!?]/g) || []).length <= 2;
+  out.opening = opW >= 6 && !/^(hope|hoping|sorry|just|so\b|i hope|how are|hi\b|hello\b)/i.test(op);
   var ls = lines(w.body);
   var listN = ls.filter(isListLine).length, headN = ls.filter(isHeaderLine).length;
-  out.structure = headN >= 1 && listN >= 3 && words(w.body) >= 40;
-  var b = String(w.body || '');
-  out.facts = /\b42\b/.test(b) && /\b30\b/.test(b) && /(glue|paper|suppl)/i.test(b) && /(mara|author)/i.test(b) && /(time|arriv|get there|be there|show up)/i.test(b);
+  out.structure = headN >= 1 && listN >= 2 && words(w.body) >= 25;
+  var all = [w.subject, w.opening, w.body, w.closing].join(' \n ');
+  out.facts = /(\b42\b|forty[ -]?two)/i.test(all) && /(\b30\b|thirty)/i.test(all) && /(glue|paper|suppl|craft)/i.test(all) && /(mara|author)/i.test(all);
   var cl = String(w.closing || '').trim();
-  out.closing = words(cl) >= 6 && /(monday|tuesday|wednesday|thursday|friday|today|tomorrow|tonight|\bby\b|before|noon|\d\s?(am|pm)|end of day|eod)/i.test(cl) && /(\?|please|could you|can you|would you|let me know by)/i.test(cl);
+  out.closing = words(cl) >= 5 && /(monday|tuesday|wednesday|thursday|friday|saturday|sunday|today|tomorrow|tonight|\bby\b|before|noon|\d\s?(am|pm)|end of day|eod|this week|asap|deadline|\d{1,2}\/\d{1,2})/i.test(cl) && /(\?|please|could|can you|would you|let me know|need|confirm|reply|answer)/i.test(cl);
   var sg = lines(w.signature);
-  out.signature = sg.length >= 2 && words(sg[0]) >= 2 && /^[A-Za-z' .-]+$/.test(sg[0]) && words(sg[1]) >= 1;
-  out.all = CHECKS.every(function(c){ return out[c.k]; });
+  out.signature = sg.length >= 2 && words(sg[0]) >= 1 && words(sg[1]) >= 1;
+  out.count = CHECKS.filter(function(c){ return out[c.k]; }).length;
+  out.all = out.count === CHECKS.length;
+  // the gate is effort: every box has real content, and at least 4 of the 6 checks pass
+  out.canLock = words(w.subject) >= 2 && words(w.opening) >= 5 && words(w.body) >= 25 && words(w.closing) >= 3 && lines(w.signature).length >= 1 && out.count >= 4;
+  out.missing = CHECKS.filter(function(c){ return !out[c.k]; }).map(function(c){ return c.t; });
   return out;
 }
 function checksHTML(w){
   var r = runChecks(w);
-  return '<div class="checks" id="checks"><div class="ct">Checklist · ' + CHECKS.filter(function(c){ return r[c.k]; }).length + ' of 6 ready</div>' +
-    CHECKS.map(function(c){ return '<div class="ck' + (r[c.k] ? ' ok' : '') + '"><span class="box">' + (r[c.k] ? '✓' : '') + '</span><span>' + c.t + '</span></div>'; }).join('') + '</div>';
+  return '<div class="checks" id="checks"><div class="ct">Checklist · ' + r.count + ' of 6 ready' + (r.canLock && !r.all ? ' · you can lock in now, or fix the rest first' : '') + '</div>' +
+    CHECKS.map(function(c){ return '<div class="ck' + (r[c.k] ? ' ok' : '') + '"><span class="box">' + (r[c.k] ? '✓' : '') + '</span><span>' + c.t + (r[c.k] ? '' : '<br><span class="small">' + esc(c.hint) + '</span>') + '</span></div>'; }).join('') + '</div>';
 }
 function previewHTML(w){
   var ls = lines(w.body), body = '', open = null;
   function close(){ if (open){ body += '</' + open + '>'; open = null; } }
   ls.forEach(function(l){
-    if (/^\d+[.)]\s+/.test(l)){ if (open !== 'ol'){ close(); body += '<ol>'; open = 'ol'; } body += '<li>' + esc(l.replace(/^\d+[.)]\s+/, '')) + '</li>'; }
-    else if (/^[-•*]\s+/.test(l)){ if (open !== 'ul'){ close(); body += '<ul>'; open = 'ul'; } body += '<li>' + esc(l.replace(/^[-•*]\s+/, '')) + '</li>'; }
+    if (/^(\d+\s*[.):-]|[a-zA-Z][.)])\s*\S/.test(l)){ if (open !== 'ol'){ close(); body += '<ol>'; open = 'ol'; } body += '<li>' + esc(l.replace(/^(\d+\s*[.):-]|[a-zA-Z][.)])\s*/, '')) + '</li>'; }
+    else if (/^[-•*–—·]\s*\S/.test(l)){ if (open !== 'ul'){ close(); body += '<ul>'; open = 'ul'; } body += '<li>' + esc(l.replace(/^[-•*–—·]\s*/, '')) + '</li>'; }
     else if (isHeaderLine(l)){ close(); body += '<p class="h">' + esc(l) + '</p>'; }
     else { close(); body += '<p>' + esc(l) + '</p>'; }
   });
@@ -819,7 +829,7 @@ function renderWrite(p, s){
   h += '<label class="wlab" for="wclose">Closing <span>· one next step with a day</span></label><textarea id="wclose" class="field" style="min-height:80px">' + esc(w.closing) + '</textarea>';
   h += '<label class="wlab" for="wsig">Signature <span>· name on line 1, role on line 2</span></label><textarea id="wsig" class="field" style="min-height:80px">' + esc(w.signature) + '</textarea>';
   h += '<div id="ckwrap">' + checksHTML(w) + '</div>';
-  h += '<div class="btnrow"><button class="btn blue" type="button" id="lockBtn"' + (runChecks(w).all ? '' : ' disabled') + '>🔒 Lock in my email</button><span class="small">Locking in cannot be undone.</span></div>';
+  h += '<div class="btnrow"><button class="btn blue" type="button" id="lockBtn"' + (runChecks(w).canLock ? '' : ' disabled') + '>🔒 Lock in my email</button><span class="small">The button turns on when at least 4 of the 6 are ready. Locking in cannot be undone.</span></div>';
   return h;
 }
 function renderEnd(){
@@ -921,13 +931,15 @@ function bind(p, s){
     var upd = function(){
       w.subject = $('#wsub').value; w.opening = $('#wopen').value; w.body = $('#wbody').value; w.closing = $('#wclose').value; w.signature = $('#wsig').value;
       $('#ckwrap').innerHTML = checksHTML(w);
-      $('#lockBtn').disabled = !runChecks(w).all;
+      $('#lockBtn').disabled = !runChecks(w).canLock;
       save();
     };
     ['#wsub', '#wopen', '#wbody', '#wclose', '#wsig'].forEach(function(id){ $(id).addEventListener('input', upd); });
     onClick('#lockBtn', function(){
-      upd(); if (!runChecks(w).all) return;
-      if (!confirm('Lock in your email? You cannot change it after this.')) return;
+      upd(); var r = runChecks(w); if (!r.canLock) return;
+      var msg = r.all ? 'Lock in your email? You cannot change it after this.' : 'Lock in your email with ' + r.count + ' of 6 ready? Still missing: ' + r.missing.join(' ') + ' Your professor will see this. You cannot change it after this.';
+      if (!confirm(msg)) return;
+      w.checks = r.count;
       w.locked = true; s.done = true; s.points = p.pts; bumpPoints(); render(); window.scrollTo(0, 0);
     });
   }
